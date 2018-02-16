@@ -6,6 +6,8 @@ use Symfony\Component\Process\Process;
 use Alfheim\CriticalCss\Storage\StorageInterface;
 use Alfheim\CriticalCss\HtmlFetchers\HtmlFetcherInterface;
 
+use Log;
+
 /**
  * Generates critical-path CSS using the Critical npm package.
  *
@@ -89,8 +91,10 @@ class CriticalGenerator implements CssGeneratorInterface
         $cmd = [
             $this->criticalBin,
             '--base='.realpath(__DIR__.'/../.tmp'),
-            '--width='.$this->width,
+            // '--src=post.html',
+            '--width'.$this->width,
             '--height='.$this->height,
+            // '--ignoreConsole',
             '--minify',
         ];
 
@@ -104,6 +108,7 @@ class CriticalGenerator implements CssGeneratorInterface
 
         $cmd[] = '--timeout='.$this->timeout;
 
+        Log::debug(implode(' ', $cmd));
 
         $process = new Process(
             $cmd,
@@ -153,6 +158,8 @@ class CriticalGenerator implements CssGeneratorInterface
                         'install` again.', $uri)
             );
         }
+
+        Log::debug($process->getOutput());
 
         return $this->storage->writeCss(
             is_null($alias) ? $uri : $alias,
